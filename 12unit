@@ -1,0 +1,107 @@
+ConnectorJDBC.java
+package connector;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+public class ConnectorJDBC extends HttpServlet
+{
+@Override
+protected void doGet(HttpServletRequest request, HttpServletResponse 
+response)
+throws ServletException, IOException 
+{
+try
+{
+doProcess(request,response);
+}
+catch(SQLException e)
+{
+e.printStackTrace();
+}
+}
+@Override
+protected void doPost(HttpServletRequest request, 
+HttpServletResponse response)
+throws ServletException, IOException {
+try{
+doProcess(request,response);
+}catch(SQLException e){
+e.printStackTrace();
+}
+}
+private void doProcess(HttpServletRequest request, 
+HttpServletResponse response)
+throws ServletException, IOException , SQLException{
+Connection conn = null;
+Statement stmt = null;
+ResultSet rs = null;
+PrintWriter out = response.getWriter();
+try
+{
+Class.forName("com.mysql.jdbc.Driver").newInstance();
+conn = 
+DriverManager.getConnection("jdbc:mysql://localhost:3306/naulej",
+"root","root");
+stmt = conn.createStatement();
+rs = stmt.executeQuery("select * from userinformation");
+out.print("<html>");
+out.print("<head>");
+out.print("<title>Hello Connect Database</title>");
+out.print("</head>");
+out.print("<name>");
+out.print("<h1>Name from database</h1>");
+out.print("<br/>");
+System.out.println("Get value from table userinformation.");
+while(rs.next()){
+out.println("<tr>");
+out.print("Name : " + rs.getString("name"));
+out.print("\t\t\t");
+out.print("Sex : " + rs.getString("sex"));
+out.print("Address : " + rs.getString("address"));
+out.print("</tr><br/>");
+}
+out.print("</body>");
+out.print("</html>"); // out.flush();
+}
+catch(Exception e)
+{
+e.printStackTrace();
+}
+finally
+{
+if(stmt != null)
+{
+stmt.close();
+}
+if(conn != null)
+{
+conn.close();
+}
+}
+}
+}
+web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="2.4" 
+xmlns="http://java.sun.com/xml/ns/j2ee" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+<display-name>dbconnection</display-name>
+<servlet>
+<servlet-name>ConnectorJDBC</servlet-name>
+<servlet-class>connector.ConnectorJDBC</servlet-class>
+</servlet>
+<servlet-mapping>
+<servlet-name>ConnectorJDBC</servlet-name>
+<url-pattern>/ConnectorJDBC</url-pattern>
+</servlet-mapping>
+</web-app>
